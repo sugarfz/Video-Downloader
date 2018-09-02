@@ -1,5 +1,4 @@
 # Video-Downloader
-Video-Downloader
 You can use it to download the video of zhihu and iqiyi now.
 
 # Platform
@@ -7,7 +6,7 @@ You can use it to download the video of zhihu and iqiyi now.
 - Python3.6  
 
 # Update Log
-### 2018-09-01:
+### 2018-09-02:
 Version: V1.0  
 Support for zhihu and iqiyi video download.
 
