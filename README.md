@@ -1,7 +1,5 @@
 # Video-Downloader
-<<<<<<< HEAD
 Video-Downloader
-=======
 You can use it to download the video of zhihu and iqiyi now.
 
 # Platform
@@ -14,5 +12,4 @@ Version: V1.0
 Support for zhihu and iqiyi video download.
 
 # GUI:
-![img](./screenshot/gui.png)
->>>>>>> b0bab67... submit project
+![img](./Screenshot/gui.png)
