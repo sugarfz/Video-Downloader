@@ -10,10 +10,11 @@ from requests import RequestException
 import gui
 
 
-def get_page(url):
+def get_page(url, referer=''):
 	try:
 		headers = {
-			'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.75 Safari/537.36'
+			'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.75 Safari/537.36',
+			'Referer': referer
 		}
 		response = requests.get(url, headers=headers, timeout=30)
 		if response.status_code == 200:
@@ -174,7 +175,7 @@ def download_m3u8(m3u8_url, path, name, video_count=''):
 		th_download_time.setDaemon(True)
 		th_download_time.start()
 		while popen.poll() is None:
-			line = popen.stdout.readline().decode('gbk').strip()
+			line = popen.stdout.readline().decode('utf-8').strip()
 			print(line)
 			th_video_info = threading.Thread(target=show_video_info, args=(line,))
 			th_info_filter = threading.Thread(target=info_filter, args=(line,))
