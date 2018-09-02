@@ -3,7 +3,10 @@ You can use it to download the video of zhihu and iqiyi now.
 
 # Platform
 - Win10  
-- Python3.6  
+- Python3.6
+
+# Tools
+- FFmpeg
 
 # Update Log
 ### 2018-09-02:
