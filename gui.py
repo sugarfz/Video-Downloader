@@ -1,7 +1,9 @@
 import os
 import signal
 import threading
+import win32clipboard
 from tkinter import *
+from tkinter import messagebox
 from tkinter.scrolledtext import ScrolledText
 from PIL import Image, ImageTk
 from tkinter.filedialog import askdirectory
@@ -91,20 +93,64 @@ def download():
 		name = 'video'  # 默认文件名
 	video_platform = var_option_menu.get()
 	if video_platform == options[0]:
-		th = threading.Thread(target=zhihu_video.run, args=(url, path, name))
-	else:
 		th = threading.Thread(target=vip_video.run, args=(url, path, name))
+	else:
+		th = threading.Thread(target=zhihu_video.run, args=(url, path, name))
 	th.setDaemon(True)
 	th.start()
 
 
 def stop():
 	os.kill(0, signal.CTRL_C_EVENT)
+	
+
+def quit_gui():
+	top.destroy()
+	top.quit()
 
 
 def select_path():
 	_path = askdirectory()
 	var_path_text.set(_path)
+
+
+def about_author():
+	title = '关于作者'
+	msg = '作者: sugarfz\nGithub: https://github.com/sugarfz/Video-Downloader'
+	messagebox.showinfo(title, msg)
+
+
+def send_to_clipboard(content):
+	text = content.encode(encoding='utf-8')
+	win32clipboard.OpenClipboard()
+	win32clipboard.EmptyClipboard()
+	win32clipboard.SetClipboardData(win32clipboard.CF_TEXT, text)
+	win32clipboard.CloseClipboard()
+	messagebox.showinfo('提示', '在线视频链接已复制到粘贴板')
+
+
+def play_line_1():
+	url = entry_url.get()
+	video_platform = var_option_menu.get()
+	if url == empty_url:
+		messagebox.showwarning('警告', '请选择视频平台，并输入有效的视频链接')
+	if video_platform == options[0]:
+		video_url = 'http://www.wmxz.wang/video.php?url=' + url
+		send_to_clipboard(video_url)
+	else:
+		send_to_clipboard(url)
+
+
+def play_line_2():
+	url = entry_url.get()
+	video_platform = var_option_menu.get()
+	if url == empty_url:
+		messagebox.showwarning('警告', '请输入有效的视频链接')
+	if video_platform == options[0]:
+		video_url = 'http://www.vipjiexi.com/tong.php?url=' + url
+		send_to_clipboard(video_url)
+	else:
+		send_to_clipboard(url)
 
 
 # 顶层窗口
@@ -113,6 +159,22 @@ top.title('视频下载器 - V1.0    by:  sugarfz')
 top.geometry('800x500+290+100')  # 初始化窗口大小
 top.resizable(False, False)  # 窗口长宽不可变
 top.config(bg='#535353')
+
+# 菜单
+menu_bar = Menu(top)
+file_menu = Menu(menu_bar, tearoff=False)
+file_menu.add_command(label='下载', command=download)
+file_menu.add_command(label='停止', command=stop)
+file_menu.add_command(label='退出', command=quit_gui)
+menu_bar.add_cascade(label='文件', menu=file_menu)
+more_info = Menu(menu_bar, tearoff=False)
+more_info.add_command(label='关于作者', command=about_author)
+menu_bar.add_cascade(label='更多', menu=more_info)
+get_online_video_url = Menu(menu_bar, tearoff=False)
+get_online_video_url.add_command(label='播放线路1', command=play_line_1)
+get_online_video_url.add_command(label='播放线路2', command=play_line_2)
+menu_bar.add_cascade(label='获取在线视频链接', menu=get_online_video_url)
+top.config(menu=menu_bar)
 
 # 插入背景图片(Label)
 tmp = open('logo.gif', 'wb+')  # 临时文件用来保存gif文件
@@ -136,7 +198,7 @@ button_choice = Button(top, relief=RAISED, text='打开', fg='#F5F5F5', bg='#7A7
 
 # 视频平台选择(Label+OptionMenu)
 label_option = Label(top, text='视频平台', fg='#F5F5F5', bg='#535353', cursor='cross')
-options = ['1.知乎', '2.爱奇艺']
+options = ['1.爱奇艺', '2.知乎']
 var_option_menu = StringVar()
 var_option_menu.set(options[0])
 option_menu = OptionMenu(top, var_option_menu, *options)
@@ -151,7 +213,7 @@ entry_name = Entry(top, relief=SUNKEN, fg='gray', bg='#3A3A3A', bd=2, width=21, 
 # 下载/停止/退出按钮
 button_start = Button(top, text='下载', fg='#F5F5F5', bg='#7A7A7A', command=download, height=1, width=15, relief=GROOVE, bd=2, activebackground='#F5F5F5', activeforeground='#535353')
 button_stop = Button(top, text='停止', fg='#F5F5F5', bg='#7A7A7A', command=stop, height=1, width=15, relief=GROOVE, bd=2, activebackground='#F5F5F5', activeforeground='#535353')
-button_quit = Button(top, text='退出', fg='#F5F5F5', bg='#7A7A7A', command=top.quit, height=1, width=15, relief=GROOVE, bd=2, activebackground='#F5F5F5', activeforeground='#535353')
+button_quit = Button(top, text='退出', fg='#F5F5F5', bg='#7A7A7A', command=quit_gui, height=1, width=15, relief=GROOVE, bd=2, activebackground='#F5F5F5', activeforeground='#535353')
 
 # 视频信息(Label)
 label_video_title = Label(top, text='信息显示:', fg='#F5F5F5', bg='#535353')
@@ -209,7 +271,8 @@ canvas_progress_bar.place(relx=0.461, rely=0.952, anchor=CENTER)
 label_progress_bar_percent.place(relx=0.89, rely=0.952, anchor=CENTER)
 
 # 输入框默认内容
-var_url_text.set(r'请输入文章或视频链接...')
+empty_url = '请输入文章或视频链接...'
+var_url_text.set(empty_url)
 
 save_path = '/'.join(os.getcwd().split('\\')) + '/video'
 if not os.path.exists(save_path):
