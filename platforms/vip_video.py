@@ -29,24 +29,60 @@ def is_valid(url, path):
 					return True
 
 
-def get_m3u8_url(html):
-	pattern = re.compile('<iframe.*?src=.*?url=(.*?)\".*?</iframe>', re.S)
-	m3u8_url = re.search(pattern, html)
-	if m3u8_url:
-		return m3u8_url.group(1)
-	else:
-		print('未找到视频...')
-		gui.GUIOperate.write_scrolled_text('未找到视频...\n')
-		return None
+# http://www.vipjiexi.com/tong.php?url=[播放地址或视频id]
+def get_m3u8_url_route_1(url):
+	real_url = 'http://www.wq114.org/tong.php?url=' + url
+	html = get_page(real_url)
+	if html:
+		pattern = re.compile('<iframe.*?src=.*?url=(.*?)\".*?</iframe>', re.S)
+		m3u8_url = re.search(pattern, html)
+		if m3u8_url:
+			return m3u8_url.group(1)
+		else:
+			print('未找到视频...')
+			gui.GUIOperate.write_scrolled_text('未找到视频...\n')
+			return None
+	return None
 
+
+# http://www.wmxz.wang/video.php?url=[播放地址或视频id]
+def get_m3u8_url_route_2(url):
+	real_url = 'http://www.82190555.com/index.php?url=' + url
+	html_index = get_page(real_url)
+	if html_index:
+		pat_index = re.compile('<iframe.*?src=\"(.*?url=.*?)\".*?</iframe>', re.S)
+		m3u8_index = re.search(pat_index, html_index)
+		if m3u8_index:
+			m3u8_index = m3u8_index.group(1)
+			html_m3u8_index = get_page(m3u8_index, real_url)
+			if html_m3u8_index:
+				pat_m3u8_index = re.compile('(https://.*?index.m3u8)', re.S)
+				m3u8_index_url = re.search(pat_m3u8_index, html_m3u8_index)
+				if m3u8_index_url:
+					m3u8_index_url = m3u8_index_url.group(1)
+					html_m3u8_url = get_m3u8_content(m3u8_index_url)
+					file_line = html_m3u8_url.split('\n')
+					for index, line in enumerate(file_line):
+						if "EXT-X-STREAM-INF" in line:
+							m3u8_content = str(file_line[index + 1])
+							return m3u8_index_url.replace('index.m3u8', m3u8_content)
+					print('未找到视频...')
+					gui.GUIOperate.write_scrolled_text('未找到视频...\n')
+					return None
+				return None
+			return None
+		return None
+	return None
+	
 
 def run(url, path, name):
 	if is_valid(url, path):  # 判断有效性
 		gui.GUIOperate.change_entry_fg('#F5F5F5')
-		real_url = 'http://www.wq114.org/tong.php?url=' + url
-		html = get_page(real_url)
-		if html:
-			m3u8_url = get_m3u8_url(html)
+		m3u8_url = get_m3u8_url_route_2(url)
+		if m3u8_url:
+			download_m3u8(m3u8_url, path, name)
+		else:
+			m3u8_url = get_m3u8_url_route_1(url)
 			if m3u8_url:
 				download_m3u8(m3u8_url, path, name)
 
